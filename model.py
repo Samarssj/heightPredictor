@@ -1,11 +1,26 @@
 import sys
-import numpy as np
+from pathlib import Path
+
 import joblib
+import numpy as np
 
-# Load trained model
-model = joblib.load('height_model.pkl')
 
-# Get weight from command line argument
-weight = float(sys.argv[1])
-predicted_height = model.predict(np.array([[weight]]))[0]
-print(f"{predicted_height:.2f}")
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_PATH = BASE_DIR / "height_model.pkl"
+
+
+def main() -> None:
+    if len(sys.argv) != 2:
+        raise ValueError("A single weight value is required")
+
+    weight = float(sys.argv[1])
+    if not np.isfinite(weight) or weight <= 0:
+        raise ValueError("Weight must be a positive number")
+
+    model = joblib.load(MODEL_PATH)
+    predicted_height = float(model.predict(np.array([[weight]]))[0])
+    print(f"{predicted_height:.2f}")
+
+
+if __name__ == "__main__":
+    main()
